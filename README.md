@@ -1,2 +1,2 @@
 # Secure-Enterprise-Network
-A networking project to managing enterprise network with GNS-3
+Two-site enterprise network with VLANs, OSPF, DHCP, NAT and ACLs, built in GNS3
