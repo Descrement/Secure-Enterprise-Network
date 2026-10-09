@@ -12,6 +12,7 @@ Two-site enterprise network with VLANs, OSPF, DHCP, NAT and ACLs, built in GNS3
 
 ## IP Address Table
 
+## How To
 
 ## Verification
 
