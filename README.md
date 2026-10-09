@@ -1,7 +1,7 @@
 # Secure-Enterprise-Network
-## Two-site enterprise network with VLANs, OSPF, DHCP, NAT and ACLs, built in GNS3
+Two-site enterprise network with VLANs, OSPF, DHCP, NAT and ACLs, built in GNS3
 <br>
-# Topology
-
+## Topology
 ![Network topology](topology.png)
+<br>
 
