@@ -11,8 +11,9 @@ Manage basic enterprise netrworking for connecting main office to branch office.
 VLANs, OSPF, DHCP, NAT and ACLs,
 
 ## IP Address Table
-| IP Adress | Subnet Masks | Device |
-| ----------- | --- | --- |
+| IP Adress | Subnet Masks | Device | Interface |
+| --------- | ------------ | ------ | --------- |
+| 
 
 ## Verification
 
