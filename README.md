@@ -12,8 +12,7 @@ VLANs, OSPF, DHCP, NAT and ACLs,
 
 ## IP Address Table
 | IP Adress | Subnet Masks | Device |
-|-----------|
-## How To
+| ----------- | --- | --- |
 
 ## Verification
 
