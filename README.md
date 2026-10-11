@@ -165,7 +165,8 @@ Full configs for each device are in `configs/`.
 ## Troubleshooting
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| [what you saw] | [root cause] | [what fixed it] |
+| Command rejected: An interface whose trunk encapsulation is "Auto" can not be configured to "trunk" mode.
+ | Trunk encapsulation was auto | Set switchport trunk encapsulation dot1q first, then switchport mode trunk |
 
 ## What I Learned
 - [Short, specific points]
