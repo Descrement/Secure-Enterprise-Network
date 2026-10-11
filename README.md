@@ -121,7 +121,7 @@ end
 - `name Staff` gives the VLAN a name.
 - `end` returns to privileged EXEC mode.
 
-![VLANs created](screenshots/04-vlan-created.png)
+![VLANs created](screenshots/04-vlan-brief.png)
 
 **Assign an access port to a VLAN** (example: SW1 Gi0/1, the server port; repeat for each access port in the VLAN plan):
 
@@ -139,7 +139,7 @@ write memory
 - `switchport access vlan 30` puts the port in VLAN 10.
 - `write memory` saves the configuration.
 
-![Ports assigned to VLANs](screenshots/05-vlan-ports.png)
+![Ports assigned to VLANs](screenshots/05-vlan-brief.png)
 
 ### 3. Trunk and inter-VLAN routing
 Made the router-facing switch ports (SW1 Gi0/0 and SW2 Gi0/0) 802.1Q trunks. R1 Gi0/1 and R2 Gi0/0 have no IP address of their own and carry one sub-interface per VLAN (router-on-a-stick).
