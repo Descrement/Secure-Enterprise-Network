@@ -136,7 +136,7 @@ write memory
 ```
 
 - `switchport mode access` makes the port an access port (one VLAN, for end devices).
-- `switchport access vlan 30` puts the port in VLAN 10.
+- `switchport access vlan 30` puts the port in VLAN 30.
 - `write memory` saves the configuration.
 
 ![Ports assigned to VLANs](screenshots/05-vlan-brief.png)
