@@ -123,7 +123,7 @@ end
 
 ![VLANs created](screenshots/04-vlan-brief.png)
 
-**Assign an access port to a VLAN** (example: SW1 Gi0/1, the server port; repeat for each access port in the VLAN plan):
+**Assign an access port to a VLAN** (example: SW2 Gi0/1, a Branch PC port; repeat for each access port in the VLAN plan):
 
 ```
 enable
@@ -144,7 +144,24 @@ write memory
 ### 3. Trunk and inter-VLAN routing
 Made the router-facing switch ports (SW1 Gi0/0 and SW2 Gi0/0) 802.1Q trunks. R1 Gi0/1 and R2 Gi0/0 have no IP address of their own and carry one sub-interface per VLAN (router-on-a-stick).
 
-![show interfaces trunk](screenshots/06-trunk.png)
+**Trunk port** (example: SW1 Gi0/0; on SW2 allow VLANs 30 and 99 instead):
+
+```
+enable
+configure terminal
+interface gigabitethernet 0/0
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk allowed vlan 10,20,99
+end
+write memory
+```
+
+- `switchport trunk encapsulation dot1q` sets 802.1Q as the trunking protocol. IOSvL2 needs this before it accepts trunk mode.
+- `switchport mode trunk` makes the port a trunk.
+- `switchport trunk allowed vlan 10,20,99` lets only the listed VLANs cross the trunk.
+
+![show interfaces trunk](screenshots/06-vlan-trunk.png)
 
 Full configs for each device are in `configs/`.
 
@@ -165,7 +182,7 @@ Full configs for each device are in `configs/`.
 ## Troubleshooting
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| Command rejected: An interface whose trunk encapsulation is "Auto" can not be configured to "trunk" mode. | Trunk encapsulation was auto | Set switchport trunk encapsulation dot1q first, then switchport mode trunk |
+| `switchport mode trunk` rejected: `An interface whose trunk encapsulation is "Auto" can not be configured to "trunk" mode.` | The trunk encapsulation was still `auto`, so the switch would not accept trunk mode | Set `switchport trunk encapsulation dot1q` first, then `switchport mode trunk` |
 
 ## What I Learned
 - [Short, specific points]
