@@ -9,10 +9,20 @@ Design and build a small enterprise network that connects a Head Office to a Bra
 ![Network topology](topology/topology.png)
 
 ## Technologies
-VLANs, 802.1Q trunking, inter-VLAN routing (router-on-a-stick), DHCP relay, NAT/PAT, [OSPF], [ACLs], [SSH], [port security]
+- **Done:** VLANs, 802.1Q trunking, inter-VLAN routing (router-on-a-stick)
+- **In progress:** [DHCP relay], [NAT/PAT], [OSPF], [ACLs], [SSH], [port security]
 
 ## Tools
-GNS3, Cisco IOSv 15.9(3)M6, IOSvL2 [version], VPCS, Docker (server)
+GNS3, Cisco IOSv 15.9(3)M6, Cisco IOSvL2 [version], VPCS, Docker (server)
+
+## Project Status
+- [x] Hostnames, IP addresses, DNS lookup disabled
+- [x] VLANs and access ports
+- [x] Trunk and inter-VLAN routing
+- [ ] NAT/PAT on R1
+- [ ] DHCP and DNS with relay
+- [ ] OSPF
+- [ ] ACLs and hardening
 
 ## VLAN Plan
 | VLAN | Name | Subnet | Site |
@@ -24,38 +34,101 @@ GNS3, Cisco IOSv 15.9(3)M6, IOSvL2 [version], VPCS, Docker (server)
 | 99 | Management | 10.2.99.0/24 | Branch |
 
 ## IP Address Table
-| Device | Interface | IP Address | Prefix | Notes |
-|--------|-----------|------------|--------|-------|
-| R1 | Gi0/0 | DHCP | - | Outside (NAT1) |
-| R1 | Gi0/1.10 | 10.1.10.1 | /24 | VLAN 10 gateway |
-| R1 | Gi0/1.20 | 10.1.20.1 | /24 | VLAN 20 gateway |
-| R1 | Gi0/1.99 | 10.1.99.1 | /24 | VLAN 99 gateway |
-| R1 | Gi0/2 | 10.0.0.1 | /30 | WAN to R2 |
-| R2 | Gi0/2 | 10.0.0.2 | /30 | WAN to R1 |
-| R2 | Gi0/0 | 10.2.30.1 | /24 | VLAN 30 gateway |
-| R2 | Gi0/2.99 | 10.2.99.1 | /24 | VLAN 99 gateway |
-| SW1 | Vlan99 | 10.1.99.2 | /24 | Management |
-| SW2 | Vlan99 | 10.2.99.2 | /24 | Management |
-| Server | eth0 | 10.1.10.10 | /24 | DHCP and DNS |
-| Admin | e0 | 10.1.99.10 | /24 | Management PC |
-| PC1-PC4 | e0 | DHCP | - | From Server |
+| Device | Interface | IP Address | Prefix | Default Gateway | Notes |
+|--------|-----------|------------|--------|-----------------|-------|
+| R1 | Gi0/0 | DHCP | - | - | Outside (NAT1) |
+| R1 | Gi0/1 | no IP | - | - | 802.1Q trunk to SW1 (VLAN 10, 20, 99) |
+| R1 | Gi0/1.10 | 10.1.10.1 | /24 | - | VLAN 10 gateway |
+| R1 | Gi0/1.20 | 10.1.20.1 | /24 | - | VLAN 20 gateway |
+| R1 | Gi0/1.99 | 10.1.99.1 | /24 | - | VLAN 99 gateway |
+| R1 | Gi0/2 | 10.0.0.1 | /30 | - | WAN to R2 |
+| R2 | Gi0/2 | 10.0.0.2 | /30 | - | WAN to R1 |
+| R2 | Gi0/0 | no IP | - | - | 802.1Q trunk to SW2 (VLAN 30, 99) |
+| R2 | Gi0/0.30 | 10.2.30.1 | /24 | - | VLAN 30 gateway |
+| R2 | Gi0/0.99 | 10.2.99.1 | /24 | - | VLAN 99 gateway |
+| SW1 | Vlan99 | 10.1.99.2 | /24 | 10.1.99.1 | Management |
+| SW2 | Vlan99 | 10.2.99.2 | /24 | 10.2.99.1 | Management |
+| Server | eth0 | 10.1.10.10 | /24 | 10.1.10.1 | DHCP and DNS |
+| Admin | e0 | 10.1.99.10 | /24 | 10.1.99.1 | Management PC |
+| PC1-PC4 | e0 | DHCP | - | From DHCP | Addresses from the Server |
 
 ## How I Built It
-1. Set hostnames and IP addresses
-2. Created VLANs and access ports
-3. Configured the trunk and inter-VLAN routing
-4. [Configured NAT/PAT on R1]
-5. [Configured DHCP and DNS with relay]
-6. [Configured OSPF]
-7. [Applied ACLs and hardening]
+
+### 1. Hostnames, IP addresses and DNS lookup
+
+**Hostname** (repeat on every router and switch with its own name):
+
+```
+enable
+configure terminal
+hostname R1
+end
+```
+
+- `enable` enters privileged EXEC mode (the prompt ends with `#`).
+- `configure terminal` enters global configuration mode.
+- `hostname R1` sets the device name.
+- `end` returns to privileged EXEC mode.
+
+![Hostname set on R1](screenshots/01-hostname.png)
+
+**IP address** (example: the R1 WAN link; repeat for every routed interface in the table):
+
+```
+enable
+configure terminal
+interface gigabitethernet 0/2
+ip address 10.0.0.1 255.255.255.252
+no shutdown
+exit
+```
+
+- `interface gigabitethernet 0/2` selects the interface to configure.
+- `ip address` sets the IP address and subnet mask.
+- `no shutdown` brings the interface up.
+- `exit` returns to global configuration mode.
+
+![R1 Gi0/2 address](screenshots/02-ip-address.png)
+
+**Disable DNS lookup** (stops the CLI from trying to resolve a mistyped command as a hostname):
+
+```
+enable
+configure terminal
+no ip domain-lookup
+end
+write memory
+```
+
+`write memory` saves the running config (in RAM) to the startup config (in NVRAM), so it survives a reboot.
+
+![DNS lookup disabled](screenshots/03-disable-dns.png)
+
+### 2. VLANs and access ports
+Created VLANs 10, 20 and 99 on SW1 and VLANs 30 and 99 on SW2, named them, and assigned each access port to its VLAN.
+
+![show vlan brief](screenshots/04-vlan-brief.png)
+
+### 3. Trunk and inter-VLAN routing
+Made the router-facing switch ports (SW1 Gi0/0 and SW2 Gi0/0) 802.1Q trunks. R1 Gi0/1 and R2 Gi0/0 have no IP address of their own and carry one sub-interface per VLAN (router-on-a-stick).
+
+![show interfaces trunk](screenshots/05-trunk.png)
+
+Full configs for each device are in `configs/`.
+
+### 4. [NAT/PAT on R1]
+### 5. [DHCP and DNS with relay]
+### 6. [OSPF]
+### 7. [ACLs and hardening]
 
 ## Verification
-Add a short caption and a screenshot for each:
-- `show vlan brief` and `show interfaces trunk`
-- `show ip interface brief`
-- `show ip route`
-- `show ip nat translations`
-- Ping tests between sites and to the internet
+| Check | Command | Screenshot |
+|-------|---------|------------|
+| VLANs and trunks | `show vlan brief`, `show interfaces trunk` | [todo] |
+| Interface status | `show ip interface brief` | [todo] |
+| Routing table | `show ip route` | [todo] |
+| NAT translations | `show ip nat translations` | [todo] |
+| Connectivity | Ping between sites and to the internet | [todo] |
 
 ## Troubleshooting
 | Symptom | Cause | Fix |
@@ -66,6 +139,8 @@ Add a short caption and a screenshot for each:
 - [Short, specific points]
 
 ## Repository Structure
-- `topology/` diagram
+- `topology/` network diagram
 - `configs/` running configs for each device
 - `screenshots/` verification output
+
+Passwords and Cisco images are not included in this repository.
