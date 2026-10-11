@@ -107,12 +107,44 @@ write memory
 ### 2. VLANs and access ports
 Created VLANs 10, 20 and 99 on SW1 and VLANs 30 and 99 on SW2, named them, and assigned each access port to its VLAN.
 
-![show vlan brief](screenshots/04-vlan-brief.png)
+**Create a VLAN** (example: VLAN 30 on SW2; repeat for each VLAN on each switch):
+
+```
+enable
+configure terminal
+vlan 30
+name Staff
+end
+```
+
+- `vlan 30` creates the VLAN and enters VLAN configuration mode.
+- `name Staff` gives the VLAN a name.
+- `end` returns to privileged EXEC mode.
+
+![VLANs created](screenshots/04-vlan-created.png)
+
+**Assign an access port to a VLAN** (example: SW1 Gi0/1, the server port; repeat for each access port in the VLAN plan):
+
+```
+enable
+configure terminal
+interface gigabitethernet 0/1
+switchport mode access
+switchport access vlan 10
+end
+write memory
+```
+
+- `switchport mode access` makes the port an access port (one VLAN, for end devices).
+- `switchport access vlan 10` puts the port in VLAN 10.
+- `write memory` saves the configuration.
+
+![Ports assigned to VLANs](screenshots/05-vlan-ports.png)
 
 ### 3. Trunk and inter-VLAN routing
 Made the router-facing switch ports (SW1 Gi0/0 and SW2 Gi0/0) 802.1Q trunks. R1 Gi0/1 and R2 Gi0/0 have no IP address of their own and carry one sub-interface per VLAN (router-on-a-stick).
 
-![show interfaces trunk](screenshots/05-trunk.png)
+![show interfaces trunk](screenshots/06-trunk.png)
 
 Full configs for each device are in `configs/`.
 
