@@ -21,6 +21,7 @@ GNS3, Cisco IOSv 15.9(3)M6, IOSvL2 [version], VPCS, Docker (server)
 | 20 | Staff | 10.1.20.0/24 | HQ |
 | 99 | Management | 10.1.99.0/24 | HQ |
 | 30 | Staff | 10.2.30.0/24 | Branch |
+| 99 | Management | 10.2.99.0/24 | Branch |
 
 ## IP Address Table
 | Device | Interface | IP Address | Prefix | Notes |
@@ -32,6 +33,7 @@ GNS3, Cisco IOSv 15.9(3)M6, IOSvL2 [version], VPCS, Docker (server)
 | R1 | Gi0/2 | 10.0.0.1 | /30 | WAN to R2 |
 | R2 | Gi0/2 | 10.0.0.2 | /30 | WAN to R1 |
 | R2 | Gi0/0 | 10.2.30.1 | /24 | VLAN 30 gateway |
+| R2 | Gi0/2.99 | 10.2.99.1 | /24 | VLAN 99 gateway |
 | SW1 | Vlan99 | 10.1.99.2 | /24 | Management |
 | SW2 | Vlan99 | 10.2.99.2 | /24 | Management |
 | Server | eth0 | 10.1.10.10 | /24 | DHCP and DNS |
