@@ -11,9 +11,11 @@ Manage basic enterprise netrworking for connecting main office to branch office.
 VLANs, OSPF, DHCP, NAT and ACLs,
 
 ## IP Address Table
-| IP Adress | Subnet Masks | Device | Interface |
+| Device | Interface | IP Adress | Subnet Masks |
 | --------- | ------------ | ------ | --------- |
-| 
+| R1 | Gi 0/1 | 10.1.10.1 | /24 |
+| R2 | Gi 0/2 | 10.0.1.1 | /30 |
+| --------- | ------------ | ------ | --------- |
 
 ## How To
 ## Verification
