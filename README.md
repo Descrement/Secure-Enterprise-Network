@@ -9,8 +9,8 @@ Design and build a small enterprise network that connects a Head Office to a Bra
 ![Network topology](topology/topology.png)
 
 ## Technologies
-- **Done:** VLANs, 802.1Q trunking, inter-VLAN routing (router-on-a-stick)
-- **In progress:** [DHCP relay], [NAT/PAT], [OSPF], [ACLs], [SSH], [port security]
+- **Done:** VLANs, 802.1Q trunking
+- **In progress:** [inter-VLAN routing (router-on-a-stick)], [DHCP relay], [NAT/PAT], [OSPF], [ACLs], [SSH], [port security]
 
 ## Tools
 GNS3, Cisco IOSv 15.9(3)M6, Cisco IOSvL2 [version], VPCS, Docker (server)
@@ -18,7 +18,7 @@ GNS3, Cisco IOSv 15.9(3)M6, Cisco IOSvL2 [version], VPCS, Docker (server)
 ## Project Status
 - [x] Hostnames, IP addresses, DNS lookup disabled
 - [x] VLANs and access ports
-- [x] Trunk and inter-VLAN routing
+- [ ] Trunk and inter-VLAN routing
 - [ ] NAT/PAT on R1
 - [ ] DHCP and DNS with relay
 - [ ] OSPF
@@ -89,6 +89,22 @@ exit
 - `exit` returns to global configuration mode.
 
 ![R1 Gi0/2 address](screenshots/02-ip-address.png)
+
+**Static IP for the Server** (the Server is a Docker/Ubuntu node, so it uses Linux commands, not IOS):
+
+```
+ip addr add 10.1.10.10/24 dev eth0
+ip link set eth0 up
+ip route add default via 10.1.10.1
+```
+
+- `ip addr add` assigns the address and prefix to `eth0`. Write `10.1.10.10/24` with no space before `/24`, and name the interface with `dev eth0`.
+- `ip link set eth0 up` brings the interface up.
+- `ip route add default via` sets the default gateway (R1's VLAN 10 sub-interface).
+
+These commands are lost when the node restarts. To keep them, put the same settings in the node's **Edit config** network file. Check with `ip a` and `ip route`.
+
+![Server static IP](screenshots/02b-server-ip.png)
 
 **Disable DNS lookup** (stops the CLI from trying to resolve a mistyped command as a hostname):
 
@@ -163,6 +179,28 @@ write memory
 
 ![show interfaces trunk](screenshots/06-vlan-trunk.png)
 
+**Router sub-interfaces** (example: VLAN 10 on R1; repeat for VLANs 20 and 99 on R1, and for VLANs 30 and 99 on R2 Gi0/0, using the addresses in the IP table):
+
+```
+enable
+configure terminal
+interface gigabitethernet 0/1
+no shutdown
+exit
+interface gigabitethernet 0/1.10
+encapsulation dot1Q 10
+ip address 10.1.10.1 255.255.255.0
+end
+write memory
+```
+
+- `no shutdown` on the physical interface brings it up. It keeps no IP address of its own, and its sub-interfaces only come up once it is up.
+- `interface gigabitethernet 0/1.10` creates the sub-interface. The number after the dot is only a label, so matching it to the VLAN ID keeps it readable.
+- `encapsulation dot1Q 10` tags the traffic with VLAN 10. This number must match the VLAN ID.
+- `ip address` sets the VLAN's gateway address.
+
+![R1 sub-interfaces](screenshots/07-subinterfaces.png)
+
 Full configs for each device are in `configs/`.
 
 ### 4. [NAT/PAT on R1]
@@ -183,6 +221,8 @@ Full configs for each device are in `configs/`.
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | `switchport mode trunk` rejected: `An interface whose trunk encapsulation is "Auto" can not be configured to "trunk" mode.` | The trunk encapsulation was still `auto`, so the switch would not accept trunk mode | Set `switchport trunk encapsulation dot1q` first, then `switchport mode trunk` |
+| Server `ip addr add` failed with `either "local" is duplicate, or "/24" is garbage` and then `"dev" argument is required` | A space before `/24`, and no interface name in the command | Write the address and prefix together and add the interface: `ip addr add 10.1.10.10/24 dev eth0` |
+| Server cannot ping the gateway 10.1.10.1, and `show ip interface brief` on R1 shows Gi0/1 administratively down | The router's trunk-facing interface was shut down and the VLAN 10 sub-interface did not exist yet | Run `no shutdown` on Gi0/1, then create `Gi0/1.10` with `encapsulation dot1Q 10` and the gateway address |
 
 ## What I Learned
 - [Short, specific points]
