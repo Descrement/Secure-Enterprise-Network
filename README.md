@@ -142,7 +142,7 @@ ip route add default via 10.1.10.1
 > [!NOTE]
 > These commands are lost when the node restarts. To keep them, put the same settings in the node's **Edit config** network file. Check with `ip a` and `ip route`.
 
-![Server static IP](screenshots/02b-server-ip.png)
+![Server static IP](screenshots/07-ip-server.png)
 
 </details>
 
@@ -259,7 +259,7 @@ write memory
 - `encapsulation dot1Q 10` tags the traffic with VLAN 10. This number must match the VLAN ID.
 - `ip address` sets the VLAN's gateway address.
 
-![R1 sub-interfaces](screenshots/07-subinterfaces.png)
+![R1 sub-interfaces](screenshots/08-subinterfaces.png)
 
 </details>
 
